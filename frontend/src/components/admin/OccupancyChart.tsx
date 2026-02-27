@@ -14,14 +14,16 @@ interface OccupancyChartProps {
         occupied: number;
         vacant: number;
         reserved: number;
+        partial: number;
     };
 }
 
 export const OccupancyChart = ({ data }: OccupancyChartProps) => {
     const chartData: OccupancyData[] = [
-        { name: 'Ocupadas', value: data.occupied, color: '#C05621' },
-        { name: 'Desocupadas', value: data.vacant, color: '#2B6CB0' },
-        { name: 'Reservadas', value: data.reserved, color: '#22543D' },
+        { name: 'Ocupadas', value: data.occupied, color: '#C05621' }, // Orange-ish
+        { name: 'Desocupadas', value: data.vacant, color: '#2B6CB0' }, // Blue-ish
+        { name: 'Reservadas', value: data.reserved, color: '#22543D' }, // Green-ish
+        { name: 'Parcialmente Libres', value: data.partial, color: '#D69E2E' }, // Yellow-ish
     ];
 
     return (

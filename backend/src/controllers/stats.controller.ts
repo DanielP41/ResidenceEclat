@@ -14,21 +14,70 @@ export const getOccupancyStats = async (req: Request, res: Response) => {
             where: roomFilter
         });
 
-        const occupiedCount = await prisma.booking.count({
+        // Occupied: Manually set OR has an active checked-in booking
+        const occupiedCount = await prisma.room.count({
             where: {
-                status: 'CHECKED_IN',
-                room: roomFilter
+                ...roomFilter,
+                OR: [
+                    { status: 'OCCUPIED' },
+                    { bookings: { some: { status: 'CHECKED_IN' } } }
+                ]
             }
         });
 
-        const reservedCount = await prisma.booking.count({
+        // Partial: Manually set (any level)
+        const partialCount = await prisma.room.count({
             where: {
-                status: 'CONFIRMED',
-                room: roomFilter
+                ...roomFilter,
+                status: { in: ['PARTIAL_1', 'PARTIAL_2', 'PARTIAL_3'] }
             }
         });
 
-        const vacantCount = Math.max(0, totalRoomsCount - occupiedCount - reservedCount);
+        // Reserved: Manually set OR has a confirmed booking
+        const reservedCount = await prisma.room.count({
+            where: {
+                ...roomFilter,
+                status: { notIn: ['OCCUPIED', 'PARTIAL_1', 'PARTIAL_2', 'PARTIAL_3'] },
+                OR: [
+                    { status: 'RESERVED' },
+                    { bookings: { some: { status: 'CONFIRMED' } } }
+                ],
+                NOT: {
+                    bookings: { some: { status: 'CHECKED_IN' } }
+                }
+            }
+        });
+
+        const maintenanceCount = await prisma.room.count({
+            where: { ...roomFilter, status: 'MAINTENANCE' }
+        });
+
+        const vacantCount = Math.max(0, totalRoomsCount - occupiedCount - reservedCount - partialCount - maintenanceCount);
+
+        // Advanced Percentage: Bed-based occupancy for maximum precision
+        const allRooms = await prisma.room.findMany({
+            where: roomFilter,
+            select: { status: true, capacity: true }
+        });
+
+        let totalBeds = 0;
+        let occupiedBeds = 0;
+
+        allRooms.forEach(room => {
+            totalBeds += room.capacity;
+            if (room.status === 'OCCUPIED') {
+                occupiedBeds += room.capacity;
+            } else if (room.status === 'PARTIAL_1') {
+                occupiedBeds += Math.max(0, room.capacity - 1);
+            } else if (room.status === 'PARTIAL_2') {
+                occupiedBeds += Math.max(0, room.capacity - 2);
+            } else if (room.status === 'PARTIAL_3') {
+                occupiedBeds += Math.max(0, room.capacity - 3);
+            }
+            // AVAILABLE, RESERVED, MAINTENANCE count as 0 occupied beds for this metric
+        });
+
+        const occupiedPercentage = totalBeds > 0 ? (occupiedBeds / totalBeds) * 100 : 0;
 
         res.json({
             status: 'success',
@@ -36,10 +85,13 @@ export const getOccupancyStats = async (req: Request, res: Response) => {
                 total: totalRoomsCount,
                 occupied: occupiedCount,
                 reserved: reservedCount,
+                partial: partialCount,
+                maintenance: maintenanceCount,
                 vacant: vacantCount,
                 percentages: {
-                    occupied: totalRoomsCount > 0 ? (occupiedCount / totalRoomsCount) * 100 : 0,
+                    occupied: occupiedPercentage,
                     reserved: totalRoomsCount > 0 ? (reservedCount / totalRoomsCount) * 100 : 0,
+                    partial: totalRoomsCount > 0 ? (partialCount / totalRoomsCount) * 100 : 0,
                     vacant: totalRoomsCount > 0 ? (vacantCount / totalRoomsCount) * 100 : 0,
                 }
             }

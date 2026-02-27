@@ -32,6 +32,16 @@ enum Role {
   STAFF
 }
 
+enum RoomStatus {
+  AVAILABLE
+  PARTIAL_1
+  PARTIAL_2
+  PARTIAL_3
+  OCCUPIED
+  RESERVED
+  MAINTENANCE
+}
+
 // ──────────────────────────────────────────
 // Rooms — Habitaciones de la residencia
 // ──────────────────────────────────────────
@@ -42,6 +52,7 @@ model Room {
   price       Decimal  @db.Decimal(10, 2)
   capacity    Int
   residence   String   @default("Residencia A") @db.VarChar(50)
+  status      RoomStatus @default(AVAILABLE)
   amenities   Json?    @default("[]")
   images      Json?    @default("[]")
   isActive    Boolean  @default(true) @map("is_active")

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AdminLoginPage() {
     const [email, setEmail] = useState('');
@@ -78,6 +79,15 @@ export default function AdminLoginPage() {
                         {loading ? 'Entrando...' : 'Acceder al Panel'}
                     </button>
                 </form>
+
+                <div className="pt-4 border-t border-white/5">
+                    <Link 
+                        href="/" 
+                        className="flex justify-center items-center w-full py-3 text-primary border border-primary/20 text-[10px] uppercase tracking-[0.2em] hover:bg-primary/5 transition-colors font-semibold"
+                    >
+                        Página Principal
+                    </Link>
+                </div>
             </div>
         </div>
     );

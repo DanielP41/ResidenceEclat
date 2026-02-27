@@ -1,10 +1,13 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers: {
             'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             ...options.headers,
         },
     });
@@ -24,6 +27,14 @@ export const roomsApi = {
         return fetchApi(`/rooms${query}`);
     },
     getById: (id: string) => fetchApi(`/rooms/${id}`),
+    update: (id: number, data: any) => fetchApi(`/rooms/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    }),
+    updateStatus: (id: number, status: string) => fetchApi(`/rooms/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+    }),
     checkAvailability: (params: { checkIn: string; checkOut: string; capacity?: number }) => {
         const query = new URLSearchParams(params as any).toString();
         return fetchApi(`/rooms/availability?${query}`);
@@ -33,6 +44,14 @@ export const roomsApi = {
 export const bookingsApi = {
     create: (data: any) => fetchApi('/bookings', {
         method: 'POST',
+        body: JSON.stringify(data),
+    }),
+    getAll: (filters: { status?: string; roomId?: string } = {}) => {
+        const query = new URLSearchParams(filters).toString();
+        return fetchApi(`/bookings?${query}`);
+    },
+    update: (id: number, data: any) => fetchApi(`/bookings/${id}`, {
+        method: 'PUT',
         body: JSON.stringify(data),
     }),
 };

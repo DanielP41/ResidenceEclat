@@ -95,6 +95,28 @@ export const translations = {
         footer: {
             desc: 'Sistema de gestión inteligente para residencias modernas.',
             rights: '© 2026 Residencia Éclat. Todos los derechos reservados.'
+        },
+        room: {
+            status: {
+                available: 'Disponible',
+                partial_1: '1 Cama Disponible',
+                partial_2: '2 Camas Disponibles',
+                partial_3: '3 Camas Disponibles',
+                occupied: 'Ocupada',
+                reserved: 'Reservada',
+                maintenance: 'En Mantenimiento'
+            },
+            room_names: {
+                'Habitacion Individual': 'Habitación Individual',
+                'Habitacion Indvidual': 'Habitación Individual',
+                'Habitacion Doble': 'Habitación Doble',
+                'Habitacion Cuadruple': 'Habitación Cuádruple',
+                'Habitación Clásica': 'Habitación Clásica'
+            },
+            consult_next: 'Consultar próxima fecha libre',
+            out_of_service: 'Habitación fuera de servicio',
+            inquiry_subject: 'Consulta sobre',
+            wa_message: 'Hola! Quiero consultar sobre la habitación'
         }
     },
     en: {
@@ -190,6 +212,28 @@ export const translations = {
         footer: {
             desc: 'Smart management system for modern residences.',
             rights: '© 2026 Residencia Éclat. All rights reserved.'
+        },
+        room: {
+            status: {
+                available: 'Available',
+                partial_1: '1 Bed Available',
+                partial_2: '2 Beds Available',
+                partial_3: '3 Beds Available',
+                occupied: 'Occupied',
+                reserved: 'Reserved',
+                maintenance: 'Under Maintenance'
+            },
+            room_names: {
+                'Habitacion Individual': 'Individual Room',
+                'Habitacion Indvidual': 'Individual Room',
+                'Habitacion Doble': 'Double Room',
+                'Habitacion Cuadruple': 'Quadruple Room',
+                'Habitación Clásica': 'Classic Room'
+            },
+            consult_next: 'Check next available date',
+            out_of_service: 'Room out of service',
+            inquiry_subject: 'Inquiry about',
+            wa_message: 'Hello! I want to inquire about the room'
         }
     },
     pt: {
@@ -285,6 +329,28 @@ export const translations = {
         footer: {
             desc: 'Sistema de gestão inteligente para residências modernas.',
             rights: '© 2026 Residencia Éclat. Todos os direitos reservados.'
+        },
+        room: {
+            status: {
+                available: 'Disponível',
+                partial_1: '1 Cama Disponível',
+                partial_2: '2 Camas Disponíveis',
+                partial_3: '3 Camas Disponíveis',
+                occupied: 'Ocupado',
+                reserved: 'Reservado',
+                maintenance: 'Em Manutenção'
+            },
+            room_names: {
+                'Habitacion Individual': 'Quarto Individual',
+                'Habitacion Indvidual': 'Quarto Individual',
+                'Habitacion Doble': 'Quarto Duplo',
+                'Habitacion Cuadruple': 'Quarto Quádruplo',
+                'Habitación Clásica': 'Quarto Clássico'
+            },
+            consult_next: 'Consultar próxima data disponível',
+            out_of_service: 'Quarto fora de serviço',
+            inquiry_subject: 'Consulta sobre',
+            wa_message: 'Olá! Quero consultar sobre o quarto'
         }
     }
 };

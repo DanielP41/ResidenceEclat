@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Role, BookingStatus, PaymentStatus } from '@prisma/client';
+import { Role, BookingStatus, PaymentStatus, RoomStatus } from '@prisma/client';
 
 // ── Auth Schemas ──
 export const LoginSchema = z.object({
@@ -13,6 +13,7 @@ export const CreateRoomSchema = z.object({
     description: z.string().optional(),
     price: z.number().positive(),
     capacity: z.number().int().positive(),
+    status: z.nativeEnum(RoomStatus).optional(),
     amenities: z.array(z.string()).optional().default([]),
     images: z.array(z.string().url()).optional().default([]),
 });

@@ -13,6 +13,7 @@ interface RoomCardProps {
         name: string;
         price: string | number;
         capacity: number;
+        status: 'AVAILABLE' | 'PARTIAL_1' | 'PARTIAL_2' | 'PARTIAL_3' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE';
         amenities: string[];
         images: string[];
     };
@@ -24,10 +25,39 @@ export default function RoomCard({ room }: RoomCardProps) {
 
     const defaultImage = "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1974";
     const displayImage = room.images?.[0] || defaultImage;
+    const roomNames = (t.room as any)?.room_names || {};
+    const displayName = roomNames[room.name] || room.name;
 
-    const gmailLink = `mailto:residenciaeclat@gmail.com?subject=Consulta sobre ${room.name}`;
+    const getStatusLabel = (status: string) => {
+        const s = t.room?.status || {};
+        switch (status) {
+            case 'AVAILABLE': return s.available || 'Available';
+            case 'PARTIAL_1': return s.partial_1 || '1 Bed Available';
+            case 'PARTIAL_2': return s.partial_2 || '2 Beds Available';
+            case 'PARTIAL_3': return s.partial_3 || '3 Beds Available';
+            case 'OCCUPIED': return s.occupied || 'Occupied';
+            case 'RESERVED': return s.reserved || 'Reserved';
+            case 'MAINTENANCE': return s.maintenance || 'Maintenance';
+            default: return '';
+        }
+    };
+
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case 'AVAILABLE': return 'bg-blue-500/80 text-white';
+            case 'PARTIAL_1':
+            case 'PARTIAL_2':
+            case 'PARTIAL_3': return 'bg-yellow-500/80 text-black';
+            case 'OCCUPIED': return 'bg-orange-500/80 text-white';
+            case 'RESERVED': return 'bg-green-500/80 text-white';
+            case 'MAINTENANCE': return 'bg-red-500/80 text-white';
+            default: return 'bg-white/10 text-white';
+        }
+    };
+
+    const gmailLink = `mailto:residenciaeclat@gmail.com?subject=${encodeURIComponent(t.room?.inquiry_subject || 'Inquiry')} ${room.name}`;
     const igLink = "https://www.instagram.com/residencia.eclat/";
-    const waLink = `https://wa.me/5491135877019?text=Hola!%20Quiero%20consultar%20sobre%20la%20habitación%20${encodeURIComponent(room.name)}`;
+    const waLink = `https://wa.me/5491135877019?text=${encodeURIComponent(t.room?.wa_message || 'Hello! I want to inquire about')}%20${encodeURIComponent(room.name)}`;
 
     return (
         <>
@@ -40,6 +70,12 @@ export default function RoomCard({ room }: RoomCardProps) {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
+
+                    {/* Status Badge */}
+                    <div className={`absolute top-4 left-4 px-3 py-1 text-[10px] font-bold uppercase tracking-widest z-10 shadow-lg ${getStatusStyles(room.status)}`}>
+                        {getStatusLabel(room.status)}
+                    </div>
+
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300" />
 
 
@@ -53,12 +89,16 @@ export default function RoomCard({ room }: RoomCardProps) {
 
                 {/* Content Section */}
                 <div className="p-6">
-                    <h3 className="text-xl font-serif text-white mb-6 text-center">{room.name}</h3>
+                    <h3 className="text-xl font-serif text-white mb-6 text-center">{displayName}</h3>
 
                     {/* Inquiry Section */}
                     <div className="pt-4 border-t border-white/5 text-center">
-                        <p className="text-white/40 text-[11px] uppercase tracking-[0.2em] mb-4">
-                            {t.common.consult_availability}
+                        <p className={`text-[11px] uppercase tracking-[0.2em] mb-4 ${room.status === 'OCCUPIED' ? 'text-orange-400' : 'text-white/40'}`}>
+                            {room.status === 'OCCUPIED'
+                                ? (t.room?.consult_next || 'Check next available date')
+                                : room.status === 'MAINTENANCE'
+                                    ? (t.room?.out_of_service || 'Room out of service')
+                                    : t.common.consult_availability}
                         </p>
 
                         <div className="flex justify-center items-center gap-6">
@@ -128,7 +168,7 @@ export default function RoomCard({ room }: RoomCardProps) {
                                 className="object-cover"
                             />
                             <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent">
-                                <h2 className="text-2xl font-serif text-white">{room.name}</h2>
+                                <h2 className="text-2xl font-serif text-white">{displayName}</h2>
                             </div>
                         </motion.div>
                     </motion.div>
