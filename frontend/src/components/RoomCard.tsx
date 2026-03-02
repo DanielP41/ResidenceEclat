@@ -63,12 +63,13 @@ export default function RoomCard({ room }: RoomCardProps) {
         <>
             <div className="group bg-black/40 backdrop-blur-sm border border-white/5 overflow-hidden hover:border-[#c5a059]/40 transition-all duration-500">
                 {/* Image Section */}
-                <div className="relative h-56 overflow-hidden cursor-pointer" onClick={() => setIsLightboxOpen(true)}>
+                <div className="relative h-60 overflow-hidden cursor-pointer bg-[#0a0f1e]" onClick={() => setIsLightboxOpen(true)}>
                     <Image
                         src={displayImage}
                         alt={room.name}
                         fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-contain group-hover:scale-105 transition-transform duration-700"
                     />
 
                     {/* Status Badge */}

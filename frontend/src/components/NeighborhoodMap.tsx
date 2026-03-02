@@ -18,8 +18,8 @@ interface Props {
 
 const DEFAULT_MARKERS: MapMarker[] = [
     { name: 'Sede San Telmo', lat: -34.6218, lng: -58.3694, color: '#c5a059' },
-    { name: 'Sede Parque Patricios I (Olivera 1208)', lat: -34.6467, lng: -58.4801, color: '#c5a059' },
-    { name: 'Sede Parque Patricios II (Olivera 1212)', lat: -34.6482, lng: -58.4816, color: '#c5a059' },
+    { name: 'Sede Parque Avellaneda I (Olivera 1208)', lat: -34.6467, lng: -58.4801, color: '#c5a059' },
+    { name: 'Sede Parque Avellaneda II (Olivera 1212)', lat: -34.6482, lng: -58.4816, color: '#c5a059' },
 ];
 
 const LEAFLET_STYLES = `

@@ -11,8 +11,8 @@ import { useLanguage } from '@/context/LanguageContext';
 
 const RESIDENCE_NAMES: Record<string, string> = {
     'A': 'Sede San Telmo',
-    'B': 'Sede Parque Patricios I',
-    'C': 'Sede Parque Patricios II'
+    'B': 'Sede Parque Avellaneda I',
+    'C': 'Sede Parque Avellaneda II'
 };
 
 export default function RoomsPage() {

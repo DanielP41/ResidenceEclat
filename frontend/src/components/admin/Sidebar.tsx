@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Home, Calendar, BarChart3, LogOut, ChevronDown, ChevronUp } from 'lucide-react';
+import { Home, BarChart3, LogOut, ChevronDown, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Sidebar = () => {
-    const [roomsOpen, setRoomsOpen] = useState(true);
+    const [roomsOpen, setRoomsOpen] = useState(false);
     const pathname = usePathname();
 
     const residences = [
         { id: 'A', label: 'San Telmo' },
-        { id: 'B', label: 'Parque Patricios I' },
-        { id: 'C', label: 'Parque Patricios II' },
+        { id: 'B', label: 'Parque Avellaneda I' },
+        { id: 'C', label: 'Parque Avellaneda II' },
     ];
 
     const handleLogout = () => {
@@ -82,13 +82,6 @@ export const Sidebar = () => {
                     </AnimatePresence>
                 </div>
 
-                <Link
-                    href="/admin/bookings"
-                    className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${isActive('/admin/bookings') ? 'bg-white/5 text-primary' : 'text-white/60 hover:text-white'
-                        }`}
-                >
-                    <Calendar size={18} /> Reservas
-                </Link>
             </nav>
 
             <button

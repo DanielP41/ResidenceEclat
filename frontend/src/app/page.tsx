@@ -89,7 +89,7 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <h2 className="text-[#c5a059] uppercase tracking-[0.5em] text-sm mb-6 font-bold drop-shadow-xl">{t.hero.subtitle}</h2>
+                        <h2 className="text-[#1e3a5f] uppercase tracking-[0.5em] text-sm mb-6 font-bold drop-shadow-xl">{t.hero.subtitle}</h2>
                         <h1 className="text-4xl md:text-6xl font-serif mb-8 text-white drop-shadow-2xl" style={{ textShadow: '0 4px 30px rgba(0,0,0,0.8)' }}>{t.hero.title}</h1>
                         <p className="max-w-xl mx-auto text-lg text-white/90 mb-10 font-medium leading-relaxed drop-shadow-xl whitespace-pre-line">
                             {t.hero.description}
@@ -113,8 +113,8 @@ export default function LandingPage() {
                                         <div className="flex flex-col gap-1">
                                             {[
                                                 { id: 'A', label: 'Sede San Telmo' },
-                                                { id: 'B', label: 'Sede Parque Patricios I' },
-                                                { id: 'C', label: 'Sede Parque Patricios II' },
+                                                { id: 'B', label: 'Sede Parque Avellaneda I' },
+                                                { id: 'C', label: 'Sede Parque Avellaneda II' },
                                             ].map((res) => (
                                                 <Link
                                                     key={res.id}
@@ -183,26 +183,26 @@ export default function LandingPage() {
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-[#050a1f]/55 backdrop-blur-[2px]" />
 
-                <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
-                    <div className="flex-1 space-y-8 text-center md:text-left">
+                <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">
+                    <div className="w-full md:w-1/2 space-y-6 text-center md:text-left pr-0 md:pr-8">
                         <h2 className="text-primary uppercase tracking-[0.5em] text-sm mb-4">{t.convenios.subtitle}</h2>
-                        <h3 className="text-4xl md:text-5xl font-serif text-white leading-tight">{t.convenios.title}</h3>
-                        <p className="text-white/60 text-lg font-light leading-relaxed max-w-2xl">
+                        <h3 className="text-3xl md:text-4xl font-serif text-white leading-tight">{t.convenios.title}</h3>
+                        <p className="text-white/60 text-base font-light leading-relaxed">
                             {t.convenios.description}
                         </p>
                     </div>
-                    <div className="flex-1 grid grid-cols-2 gap-4">
-                        {[
-                            { name: t.convenios.items.uni, icon: <ShieldCheck size={24} className="text-primary" /> },
-                            { name: t.convenios.items.corp, icon: <Star size={24} className="text-primary" /> },
-                            { name: t.convenios.items.emb, icon: <MapPin size={24} className="text-primary" /> },
-                            { name: t.convenios.items.cowork, icon: <Clock size={24} className="text-primary" /> }
-                        ].map((item, i) => (
-                            <div key={i} className="bg-black/40 backdrop-blur-sm border border-white/10 p-8 flex flex-col items-center justify-center gap-4 hover:bg-black/60 transition-all group">
-                                <div className="group-hover:scale-110 transition-transform">{item.icon}</div>
-                                <span className="text-[10px] uppercase tracking-[0.3em] text-white/60 group-hover:text-white transition-colors text-center">{item.name}</span>
-                            </div>
-                        ))}
+                    <div className="w-full md:w-1/2 flex items-center justify-center">
+                        <div className="grid grid-cols-2 gap-4 w-full max-w-xs">
+                            {[
+                                { name: t.convenios.items.emb, icon: <MapPin size={24} className="text-primary" /> },
+                                { name: t.convenios.items.uni, icon: <ShieldCheck size={24} className="text-primary" /> },
+                            ].map((item, i) => (
+                                <div key={i} className="bg-black/40 backdrop-blur-sm border border-white/10 p-8 flex flex-col items-center justify-center gap-4 hover:bg-black/60 transition-all group">
+                                    <div className="group-hover:scale-110 transition-transform">{item.icon}</div>
+                                    <span className="text-[10px] uppercase tracking-[0.3em] text-white/60 group-hover:text-white transition-colors text-center">{item.name}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>

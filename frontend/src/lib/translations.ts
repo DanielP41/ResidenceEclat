@@ -45,9 +45,9 @@ export const translations = {
         location: {
             subtitle: 'Dónde estamos',
             title: 'Ubicación Estratégica',
-            description: 'Situada en una zona clave de la ciudad, Residencia Éclat ofrece acceso inmediato a las principales universidades, centros gastronómicos y puntos de interés.',
+            description: 'Situada en una zona clave de la ciudad, Residencia Éclat ofrece acceso inmediato a las principales Institutos, centros gastronómicos y puntos de interés.',
             address_title: 'Dirección Central',
-            address: 'Olivera 1208 / 1212, Parque Patricios, Buenos Aires',
+            address: 'Olivera 1208 / 1212, Parque Avellaneda, Buenos Aires',
             access_title: 'Accesibilidad',
             access_desc: 'A 5 minutos de estaciones de metro y corredores principales.',
             map_cta: 'Ver en Google Maps'
@@ -57,7 +57,7 @@ export const translations = {
             title: 'Convenios que potencian tu estadía',
             description: 'En Éclat, no solo ofrecemos un lugar de calidad, sino un ecosistema de beneficios. Hemos forjado alianzas con diversas instituciones para garantizarte condiciones preferenciales, descuentos y una comunidad activa.',
             items: {
-                uni: 'Universidades',
+                uni: 'Institutos',
                 corp: 'Corporativos',
                 emb: 'Gimnasios',
                 cowork: 'Coworkings'
@@ -78,16 +78,16 @@ export const translations = {
         residences: {
             A: {
                 title: 'Sede San Telmo',
-                description: 'Ubicado en el Barrio de San Telmo, tenes cercanía con varios institutos, universidades y acceso al subte.',
+                description: 'Ubicado en el Barrio de San Telmo, tenes cercanía con varios institutos, Institutos y acceso al subte.',
                 comfort: 'Espacios pensados para el descanso y el estudio. Cocina equipada, WiFi de alta velocidad, limpieza semanal y áreas comunes cómodas para que te sientas en casa.'
             },
             B: {
-                title: 'Sede Parque Patricios I (Olivera 1208)',
-                description: 'Ambientes modernos y luminosos con todas las comodidades para una estadía perfecta en Buenos Aires, cerca del Parque Patricios.',
+                title: 'Sede Parque Avellaneda I (Olivera 1208)',
+                description: 'Ambientes modernos y luminosos con todas las comodidades para una estadía perfecta en Buenos Aires, cerca del Parque Avellaneda.',
                 comfort: 'Habitaciones amplias con luz natural, cocina equipada, WiFi de alta velocidad, limpieza semanal y zonas comunes diseñadas para el estudio y la convivencia.'
             },
             C: {
-                title: 'Sede Parque Patricios II (Olivera 1212)',
+                title: 'Sede Parque Avellaneda II (Olivera 1212)',
                 description: 'Habitaciones premium con vistas privilegiadas y acceso a servicios exclusivos para una experiencia única en Buenos Aires.',
                 comfort: 'Ambientes premium con acabados de calidad, cocina totalmente equipada, WiFi de alta velocidad, limpieza semanal y espacios comunes diseñados para el bienestar.'
             }
@@ -162,9 +162,9 @@ export const translations = {
         location: {
             subtitle: 'Where we are',
             title: 'Strategic Location',
-            description: 'Located in a key area of the city, Éclat Residence offers immediate access to major universities, dining hubs, and points of interest.',
+            description: 'Located in a key area of the city, Éclat Residence offers immediate access to major Institutes, dining hubs, and points of interest.',
             address_title: 'Central Address',
-            address: 'Olivera 1208 / 1212, Parque Patricios, Buenos Aires',
+            address: 'Olivera 1208 / 1212, Parque Avellaneda, Buenos Aires',
             access_title: 'Accessibility',
             access_desc: '5 minutes from subway stations and major corridors.',
             map_cta: 'View on Google Maps'
@@ -174,7 +174,7 @@ export const translations = {
             title: 'Agreements that enhance your stay',
             description: 'At Éclat Residence, we don\'t just offer a quality place, but an ecosystem of benefits. We have forged alliances with various institutions to guarantee you preferential conditions, discounts, and an active community.',
             items: {
-                uni: 'Universities',
+                uni: 'Institutes',
                 corp: 'Corporate',
                 emb: 'Gyms',
                 cowork: 'Coworking'
@@ -195,16 +195,16 @@ export const translations = {
         residences: {
             A: {
                 title: 'San Telmo Branch',
-                description: 'Located in the San Telmo neighborhood, you are close to several institutes, universities and subway access.',
+                description: 'Located in the San Telmo neighborhood, you are close to several institutes, Institutes and subway access.',
                 comfort: 'Spaces designed for rest and study. Equipped kitchen, high-speed WiFi, weekly cleaning, and comfortable common areas to make you feel at home.'
             },
             B: {
-                title: 'Parque Patricios I Branch (Olivera 1208)',
-                description: 'Modern and bright environments with all the amenities for a perfect stay in Buenos Aires, near Parque Patricios.',
+                title: 'Parque Avellaneda I Branch (Olivera 1208)',
+                description: 'Modern and bright environments with all the amenities for a perfect stay in Buenos Aires, near Parque Avellaneda.',
                 comfort: 'Spacious rooms with natural light, equipped kitchen, high-speed WiFi, weekly cleaning, and common areas designed for study and coexistence.'
             },
             C: {
-                title: 'Parque Patricios II Branch (Olivera 1212)',
+                title: 'Parque Avellaneda II Branch (Olivera 1212)',
                 description: 'Premium rooms with privileged views and access to exclusive services for a unique experience in Buenos Aires.',
                 comfort: 'Premium environments with quality finishes, fully equipped kitchen, high-speed WiFi, weekly cleaning, and common spaces designed for well-being.'
             }
@@ -279,9 +279,9 @@ export const translations = {
         location: {
             subtitle: 'Onde estamos',
             title: 'Localização Estratégica',
-            description: 'Situada em uma área chave da cidade, a Residência Éclat oferece acesso imediato às principais universidades, centros gastronômicos e pontos de interesse.',
+            description: 'Situada em uma área chave da cidade, a Residência Éclat oferece acesso imediato às principais Institutos, centros gastronômicos e pontos de interesse.',
             address_title: 'Endereço Central',
-            address: 'Olivera 1208 / 1212, Parque Patricios, Buenos Aires',
+            address: 'Olivera 1208 / 1212, Parque Avellaneda, Buenos Aires',
             access_title: 'Acessibilidade',
             access_desc: 'A 5 minutos de estações de metrô e corredores principais.',
             map_cta: 'Ver no Google Maps'
@@ -291,7 +291,7 @@ export const translations = {
             title: 'Convênios que potenciam sua estadia',
             description: 'Na Éclat, não oferecemos apenas um lugar de qualidade, mas um ecossistema de benefícios. Estabelecemos alianças com diversas instituições para garantir a você condições preferenciais, descontos e una comunidade ativa.',
             items: {
-                uni: 'Universidades',
+                uni: 'Institutos',
                 corp: 'Corporativos',
                 emb: 'Academias',
                 cowork: 'Coworkings'
@@ -312,16 +312,16 @@ export const translations = {
         residences: {
             A: {
                 title: 'Sede San Telmo',
-                description: 'Localizado no Bairro de San Telmo, você tem proximidade com vários institutos, universidades e acesso ao metrô.',
+                description: 'Localizado no Bairro de San Telmo, você tem proximidade com vários institutos, Institutos e acesso ao metrô.',
                 comfort: 'Espaços pensados para o descanso e o estudo. Cozinha equipada, WiFi de alta velocidade, limpeza semanal e áreas comuns confortáveis para que você se sinta em casa.'
             },
             B: {
-                title: 'Sede Parque Patricios I (Olivera 1208)',
-                description: 'Ambientes modernos e luminosos com todas las comodidades para uma estadia perfeita em Buenos Aires, perto do Parque Patricios.',
+                title: 'Sede Parque Avellaneda I (Olivera 1208)',
+                description: 'Ambientes modernos e luminosos com todas las comodidades para uma estadia perfeita em Buenos Aires, perto do Parque Avellaneda.',
                 comfort: 'Quartos amplos com luz natural, cozinha equipada, WiFi de alta velocidade, limpeza semanal e zonas comuns projetadas para o estudo e a convivência.'
             },
             C: {
-                title: 'Sede Parque Patricios II (Olivera 1212)',
+                title: 'Sede Parque Avellaneda II (Olivera 1212)',
                 description: 'Quartos premium com vistas privilegiadas e acesso a servicios exclusivos para uma experiência única em Buenos Aires.',
                 comfort: 'Ambientes premium com acabamentos de qualidade, cozinha totalmente equipada, WiFi de alta velocidade, limpeza semanal e espaços comuns projetados para o bem-estar.'
             }

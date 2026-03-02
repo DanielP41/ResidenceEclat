@@ -30,7 +30,7 @@ const RESIDENCE_INFO: Record<string, {
     B: {
         mapCenter: [-34.6370, -58.3980] as [number, number],
         mapZoom: 15,
-        mapMarkers: [{ name: 'Parque Patricios I', lat: -34.6370, lng: -58.3980 }],
+        mapMarkers: [{ name: 'Parque Avellaneda I', lat: -34.6370, lng: -58.3980 }],
         images: [
             'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
             'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
@@ -41,7 +41,7 @@ const RESIDENCE_INFO: Record<string, {
     C: {
         mapCenter: [-34.6355, -58.3950] as [number, number],
         mapZoom: 15,
-        mapMarkers: [{ name: 'Parque Patricios II', lat: -34.6355, lng: -58.3950 }],
+        mapMarkers: [{ name: 'Parque Avellaneda II', lat: -34.6355, lng: -58.3950 }],
         images: [
             'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
             'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',

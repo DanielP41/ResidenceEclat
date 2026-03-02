@@ -24,8 +24,8 @@ export default function AdminRooms() {
 
     const residenceNames: Record<string, string> = {
         'A': 'San Telmo',
-        'B': 'Parque Patricios I',
-        'C': 'Parque Patricios II'
+        'B': 'Parque Avellaneda I',
+        'C': 'Parque Avellaneda II'
     };
 
     const fetchRooms = async () => {

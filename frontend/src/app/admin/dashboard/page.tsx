@@ -19,8 +19,8 @@ export default function AdminDashboard() {
     const residences = [
         { id: 'global', label: 'Vista Global' },
         { id: 'A', label: 'Sede San Telmo' },
-        { id: 'B', label: 'Sede Parque Patricios I' },
-        { id: 'C', label: 'Sede Parque Patricios II' },
+        { id: 'B', label: 'Sede Parque Avellaneda I' },
+        { id: 'C', label: 'Sede Parque Avellaneda II' },
     ];
 
     // Load observation from API when residence changes

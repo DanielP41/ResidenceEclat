@@ -11,13 +11,3 @@ export const generalLimiter = rateLimit({
     },
 });
 
-export const loginLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hora
-    max: 5, // Límite de 5 intentos
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        status: 'error',
-        message: 'Demasiados intentos de inicio de sesión, por favor intente de nuevo en una hora.',
-    },
-});
