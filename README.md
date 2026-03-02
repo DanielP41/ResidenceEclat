@@ -59,11 +59,6 @@ npm run dev
 
 El frontend estará disponible en `http://localhost:3000`
 
-## Credenciales por Defecto
-
-- **Email:** <admin@residencia-eclat.com>
-- **Password:** Admin123!
-
 ## Estructura del Proyecto
 
 ```
