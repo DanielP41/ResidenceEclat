@@ -95,7 +95,9 @@ export default function AdminRooms() {
     const getStatusStyles = (status: string) => {
         switch (status) {
             case 'AVAILABLE': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-            case 'PARTIAL_1': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+            case 'PARTIAL_1':
+            case 'PARTIAL_2':
+            case 'PARTIAL_3': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
             case 'OCCUPIED': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
             case 'RESERVED': return 'bg-green-500/10 text-green-400 border-green-500/20';
             case 'MAINTENANCE': return 'bg-red-500/10 text-red-400 border-red-500/20';
@@ -106,7 +108,9 @@ export default function AdminRooms() {
     const getStatusIcon = (status: string) => {
         switch (status) {
             case 'AVAILABLE': return <CheckCircle2 size={14} />;
-            case 'PARTIAL_1': return <Clock size={14} className="opacity-70" />;
+            case 'PARTIAL_1':
+            case 'PARTIAL_2':
+            case 'PARTIAL_3': return <Clock size={14} className="opacity-70" />;
             case 'OCCUPIED': return <Clock size={14} />;
             case 'RESERVED': return <XCircle size={14} />;
             default: return null;
@@ -117,13 +121,14 @@ export default function AdminRooms() {
         switch (status) {
             case 'AVAILABLE': return 'Disponible';
             case 'PARTIAL_1': return '1 Cama Disponible';
+            case 'PARTIAL_2': return '2 Camas Disponibles';
+            case 'PARTIAL_3': return '3 Camas Disponibles';
             case 'OCCUPIED': return 'Ocupada';
             case 'RESERVED': return 'Reservada';
             case 'MAINTENANCE': return 'Mantenimiento';
             default: return status;
         }
     };
-
 
     return (
         <div className="p-10">
@@ -205,13 +210,33 @@ export default function AdminRooms() {
                                     </button>
 
                                     {/* Partial Buttons based on capacity */}
-                                    {(residenceId !== 'A' || room.capacity >= 2) && (
+                                    {room.capacity >= 2 && (
                                         <button
                                             onClick={() => handleStatusChange(room.id, 'PARTIAL_1')}
                                             disabled={room.status === 'PARTIAL_1' || updatingId !== null}
                                             className={`px-3 py-2 text-[9px] border border-white/10 uppercase tracking-widest transition-all hover:bg-white/5 disabled:opacity-30 ${room.status === 'PARTIAL_1' ? 'text-yellow-400 border-yellow-400/40 bg-yellow-400/5' : 'text-white/40'}`}
                                         >
                                             1 Cama
+                                        </button>
+                                    )}
+
+                                    {room.capacity >= 3 && (
+                                        <button
+                                            onClick={() => handleStatusChange(room.id, 'PARTIAL_2')}
+                                            disabled={room.status === 'PARTIAL_2' || updatingId !== null}
+                                            className={`px-3 py-2 text-[9px] border border-white/10 uppercase tracking-widest transition-all hover:bg-white/5 disabled:opacity-30 ${room.status === 'PARTIAL_2' ? 'text-yellow-400 border-yellow-400/40 bg-yellow-400/5' : 'text-white/40'}`}
+                                        >
+                                            2 Camas
+                                        </button>
+                                    )}
+
+                                    {room.capacity >= 4 && (
+                                        <button
+                                            onClick={() => handleStatusChange(room.id, 'PARTIAL_3')}
+                                            disabled={room.status === 'PARTIAL_3' || updatingId !== null}
+                                            className={`px-3 py-2 text-[9px] border border-white/10 uppercase tracking-widest transition-all hover:bg-white/5 disabled:opacity-30 ${room.status === 'PARTIAL_3' ? 'text-yellow-400 border-yellow-400/40 bg-yellow-400/5' : 'text-white/40'}`}
+                                        >
+                                            3 Camas
                                         </button>
                                     )}
 
@@ -235,6 +260,7 @@ export default function AdminRooms() {
                     ))}
                 </div>
             )}
+
 
             {showForm && (
                 <RoomForm

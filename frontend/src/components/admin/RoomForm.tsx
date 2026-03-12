@@ -178,11 +178,14 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
                                 >
                                     <option value="AVAILABLE">Disponible</option>
                                     <option value="PARTIAL_1">1 Cama Disp.</option>
+                                    <option value="PARTIAL_2">2 Camas Disp.</option>
+                                    <option value="PARTIAL_3">3 Camas Disp.</option>
                                     <option value="OCCUPIED">Ocupada</option>
                                     <option value="RESERVED">Reservada</option>
                                     <option value="MAINTENANCE">Mantenimiento</option>
                                 </select>
                             </div>
+
                         </div>
                     </div>
 
