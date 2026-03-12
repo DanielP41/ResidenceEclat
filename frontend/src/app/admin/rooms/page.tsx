@@ -1,11 +1,19 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { roomsApi } from '@/lib/api';
 import { BedDouble, CheckCircle2, Clock, XCircle, Plus, Edit, Trash2 } from 'lucide-react';
 import { RoomForm } from '@/components/admin/RoomForm';
 
 interface Room {
-    // ... same interface ...
+    id: number;
+    name: string;
+    type: string;
+    capacity: number;
+    status: 'AVAILABLE' | 'PARTIAL_1' | 'PARTIAL_2' | 'PARTIAL_3' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE';
+    price: number;
+    residence: string;
 }
 
 export default function AdminRooms() {
@@ -85,16 +93,37 @@ export default function AdminRooms() {
     const filteredRooms = rooms;
 
     const getStatusStyles = (status: string) => {
-        // ... same styles ...
+        switch (status) {
+            case 'AVAILABLE': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+            case 'PARTIAL_1': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
+            case 'OCCUPIED': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
+            case 'RESERVED': return 'bg-green-500/10 text-green-400 border-green-500/20';
+            case 'MAINTENANCE': return 'bg-red-500/10 text-red-400 border-red-500/20';
+            default: return 'bg-white/5 text-white/40 border-white/10';
+        }
     };
 
     const getStatusIcon = (status: string) => {
-        // ... same icons ...
+        switch (status) {
+            case 'AVAILABLE': return <CheckCircle2 size={14} />;
+            case 'PARTIAL_1': return <Clock size={14} className="opacity-70" />;
+            case 'OCCUPIED': return <Clock size={14} />;
+            case 'RESERVED': return <XCircle size={14} />;
+            default: return null;
+        }
     };
 
     const getStatusLabel = (status: string) => {
-        // ... same labels ...
+        switch (status) {
+            case 'AVAILABLE': return 'Disponible';
+            case 'PARTIAL_1': return '1 Cama Disponible';
+            case 'OCCUPIED': return 'Ocupada';
+            case 'RESERVED': return 'Reservada';
+            case 'MAINTENANCE': return 'Mantenimiento';
+            default: return status;
+        }
     };
+
 
     return (
         <div className="p-10">
