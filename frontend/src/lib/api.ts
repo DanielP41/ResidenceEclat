@@ -27,9 +27,16 @@ export const roomsApi = {
         return fetchApi(`/rooms${query}`);
     },
     getById: (id: string) => fetchApi(`/rooms/${id}`),
+    create: (data: any) => fetchApi('/rooms', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    }),
     update: (id: number, data: any) => fetchApi(`/rooms/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
+    }),
+    delete: (id: number) => fetchApi(`/rooms/${id}`, {
+        method: 'DELETE',
     }),
     updateStatus: (id: number, status: string) => fetchApi(`/rooms/${id}`, {
         method: 'PUT',

@@ -13,10 +13,12 @@ export const CreateRoomSchema = z.object({
     description: z.string().optional(),
     price: z.number().positive(),
     capacity: z.number().int().positive(),
+    residence: z.string().min(1, 'La sede es requerida'),
     status: z.nativeEnum(RoomStatus).optional(),
     amenities: z.array(z.string()).optional().default([]),
     images: z.array(z.string().url()).optional().default([]),
 });
+
 
 export const UpdateRoomSchema = CreateRoomSchema.partial();
 
