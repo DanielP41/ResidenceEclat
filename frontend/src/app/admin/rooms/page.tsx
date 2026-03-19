@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { roomsApi } from '@/lib/api';
+import { roomsApi, fetchApi } from '@/lib/api';
+import { toast } from 'sonner';
+
 import { BedDouble, CheckCircle2, Clock, XCircle, Plus, Edit, Trash2 } from 'lucide-react';
 import { RoomForm } from '@/components/admin/RoomForm';
+import { ConfirmModal } from '@/components/admin/ConfirmModal';
+import { SkeletonAdminRoomsGrid } from '@/components/ui/Skeleton';
 
 interface Room {
     id: number;
@@ -16,25 +20,31 @@ interface Room {
     residence: string;
 }
 
-export default function AdminRooms() {
+function AdminRoomsContent() {
     const searchParams = useSearchParams();
-    const residenceId = searchParams.get('residence') || 'A';
+    const residenceId = searchParams.get('residence') || '1';
     const [rooms, setRooms] = useState<Room[]>([]);
+    const [residences, setResidences] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState<number | null>(null);
     const [showForm, setShowForm] = useState(false);
     const [editingRoom, setEditingRoom] = useState<any>(null);
+    const [deletingRoomId, setDeletingRoomId] = useState<number | null>(null);
 
-    const residenceNames: Record<string, string> = {
-        'A': 'San Telmo',
-        'B': 'Parque Avellaneda I',
-        'C': 'Parque Avellaneda II'
+    const fetchResidences = async () => {
+        try {
+            const response = await fetchApi('/residences');
+            setResidences(response.data);
+        } catch (error) {
+            console.error('Error fetching residences:', error);
+        }
     };
+
 
     const fetchRooms = async () => {
         setLoading(true);
         try {
-            const response = await roomsApi.getAll(residenceId);
+            const response = await roomsApi.getAll(parseInt(residenceId, 10));
             if (response.status === 'success') {
                 setRooms(response.data);
             }
@@ -44,6 +54,11 @@ export default function AdminRooms() {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchResidences();
+    }, []);
+
 
     useEffect(() => {
         fetchRooms();
@@ -57,7 +72,7 @@ export default function AdminRooms() {
             setRooms(prev => prev.map(r => r.id === roomId ? { ...r, status: newStatus as any } : r));
         } catch (error) {
             console.error('Error updating status:', error);
-            alert('Error al actualizar el estado');
+            toast.error('Error al actualizar el estado');
         } finally {
             setUpdatingId(null);
         }
@@ -73,20 +88,31 @@ export default function AdminRooms() {
             setShowForm(false);
             setEditingRoom(null);
             fetchRooms();
-        } catch (error) {
-            console.error(error);
-            alert('Error al guardar la habitación');
+        } catch (error: any) {
+            console.error('Error saving room:', error);
+            let msg = error.message || 'Error al guardar la habitación';
+
+            if (error.details && Array.isArray(error.details)) {
+                const details = error.details.map((d: any) => `- ${d.message}`).join('\n');
+                msg += `:\n${details}`;
+            }
+
+            toast.error(msg);
         }
     };
 
-    const handleDeleteRoom = async (id: number) => {
-        if (!confirm('¿Estás seguro de eliminar esta habitación?')) return;
+
+
+    const handleDeleteRoom = async () => {
+        if (!deletingRoomId) return;
         try {
-            await roomsApi.delete(id);
+            await roomsApi.delete(deletingRoomId);
             fetchRooms();
         } catch (error) {
             console.error(error);
-            alert('Error al eliminar');
+            toast.error('Error al eliminar');
+        } finally {
+            setDeletingRoomId(null);
         }
     };
 
@@ -135,8 +161,11 @@ export default function AdminRooms() {
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                 <div>
                     <div className="text-primary text-xs uppercase tracking-[0.2em] mb-1">Gestión de Habitaciones</div>
-                    <h1 className="text-3xl font-serif">Sede {residenceNames[residenceId]}</h1>
+                    <h1 className="text-3xl font-serif">
+                        Sede {residences.find(r => r.id.toString() === residenceId)?.name || '...'}
+                    </h1>
                 </div>
+
                 <button
                     onClick={() => { setEditingRoom(null); setShowForm(true); }}
                     className="flex items-center gap-2 bg-primary text-black px-6 py-3 font-bold text-xs uppercase tracking-widest hover:brightness-110 transition-all rounded-sm"
@@ -147,7 +176,7 @@ export default function AdminRooms() {
             </header>
 
             {loading ? (
-                <div className="text-white/20 uppercase tracking-widest text-xs">Cargando habitaciones...</div>
+                <SkeletonAdminRoomsGrid count={8} />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredRooms.map((room) => (
@@ -171,7 +200,7 @@ export default function AdminRooms() {
                                                 <Edit size={12} />
                                             </button>
                                             <button
-                                                onClick={() => handleDeleteRoom(room.id)}
+                                                onClick={() => setDeletingRoomId(room.id)}
                                                 className="p-1.5 bg-white/5 text-white/40 hover:text-red-400 transition-colors rounded border border-white/5"
                                                 title="Eliminar"
                                             >
@@ -262,13 +291,33 @@ export default function AdminRooms() {
             )}
 
 
+            {deletingRoomId && (
+                <ConfirmModal
+                    title="Eliminar Habitación"
+                    message={`¿Estás seguro de eliminar "${rooms.find(r => r.id === deletingRoomId)?.name}"? Esta acción no se puede deshacer.`}
+                    confirmLabel="Eliminar"
+                    onConfirm={handleDeleteRoom}
+                    onCancel={() => setDeletingRoomId(null)}
+                />
+            )}
+
             {showForm && (
                 <RoomForm
                     room={editingRoom}
+                    residenceId={parseInt(residenceId, 10)}
                     onClose={() => { setShowForm(false); setEditingRoom(null); }}
                     onSave={handleSaveRoom}
                 />
+
             )}
         </div>
+    );
+}
+
+export default function AdminRooms() {
+    return (
+        <Suspense fallback={<div className="bg-black min-h-screen" />}>
+            <AdminRoomsContent />
+        </Suspense>
     );
 }

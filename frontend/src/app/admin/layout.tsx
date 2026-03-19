@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Sidebar } from '@/components/admin/Sidebar';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 export default function AdminLayout({
     children,
@@ -10,7 +10,17 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const router = useRouter();
     const isLoginPage = pathname === '/admin/login';
+
+    useEffect(() => {
+        if (!isLoginPage) {
+            const token = localStorage.getItem('user');
+            if (!token) {
+                router.replace('/admin/login');
+            }
+        }
+    }, [isLoginPage, router]);
 
     if (isLoginPage) {
         return <div className="min-h-screen bg-[#050505] text-white">{children}</div>;

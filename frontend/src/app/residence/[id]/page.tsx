@@ -4,8 +4,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, BedDouble, X } from 'lucide-react';
-import { roomsApi } from '@/lib/api';
+import { ArrowLeft, BedDouble, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { roomsApi, residencesApi } from '@/lib/api';
+
 import dynamic from 'next/dynamic';
 
 const NeighborhoodMap = dynamic(() => import('@/components/NeighborhoodMap'), { ssr: false });
@@ -52,15 +53,42 @@ const RESIDENCE_INFO: Record<string, {
 };
 
 import { useLanguage } from '@/context/LanguageContext';
+import { SkeletonResidenceDetail } from '@/components/ui/Skeleton';
 
 export default function ResidenceDetailPage() {
     const { t } = useLanguage();
     const params = useParams();
-    const id = (params?.id as string)?.toUpperCase();
+    const id = params?.id as string;
+    const [residence, setResidence] = useState<any>(null);
     const [roomCount, setRoomCount] = useState<number | null>(null);
     const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [direction, setDirection] = useState(0);
 
     const closeLightbox = useCallback(() => setLightboxSrc(null), []);
+
+
+
+    useEffect(() => {
+        if (id) {
+            const fetchData = async () => {
+                setLoading(true);
+                try {
+                    const res = await residencesApi.getById(id);
+                    setResidence(res.data);
+
+                    const roomsRes = await roomsApi.getAll(parseInt(id));
+                    setRoomCount(roomsRes.data?.length ?? 0);
+                } catch (error) {
+                    console.error('Error fetching residence detail:', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchData();
+        }
+    }, [id]);
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeLightbox(); };
@@ -68,19 +96,11 @@ export default function ResidenceDetailPage() {
         return () => window.removeEventListener('keydown', onKey);
     }, [closeLightbox]);
 
-    const info = RESIDENCE_INFO[id];
-    // @ts-ignore
-    const tInfo = t.residences[id];
+    if (loading) {
+        return <SkeletonResidenceDetail />;
+    }
 
-    useEffect(() => {
-        if (id) {
-            roomsApi.getAll(id)
-                .then(res => setRoomCount(res.data?.length ?? 0))
-                .catch(() => setRoomCount(null));
-        }
-    }, [id]);
-
-    if (!info || !tInfo) {
+    if (!residence) {
         return (
             <div className="min-h-screen bg-[#050a1f] flex items-center justify-center">
                 <div className="text-center">
@@ -91,10 +111,65 @@ export default function ResidenceDetailPage() {
         );
     }
 
+    // Mapping new IDs to legacy assets
+    const legacyId = id === '1' ? 'A' : id === '2' ? 'C' : id === '3' ? 'B' : null;
+
+    // Resolve dynamic data from residence object
+    const dynamicImages = Array.isArray(residence.images) && residence.images.length > 0
+        ? residence.images
+        : [
+            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
+            'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+            'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=800&q=80',
+            'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
+        ];
+
+    const info = legacyId ? RESIDENCE_INFO[legacyId] : {
+        mapCenter: [-34.6037, -58.3816] as [number, number],
+        mapZoom: 13,
+        mapMarkers: [{ name: residence.name, lat: -34.6037, lng: -58.3816 }],
+        images: dynamicImages,
+    };
+
+    // Use legacy photos for original residences to maintain design quality
+    if (legacyId) {
+        info.images = RESIDENCE_INFO[legacyId].images;
+    }
+
+
+    // @ts-ignore
+    const tInfo = legacyId ? t.residences[legacyId] : {
+        title: `Sede ${residence.name}`,
+        description: residence.description || 'Una de nuestras sedes exclusivas para estudiantes y profesionales.',
+        comfort: 'Diseñada para ofrecer la máxima comodidad y un ambiente de estudio ideal.'
+    };
+
+    const paginate = (newDirection: number) => {
+        setDirection(newDirection);
+        setCurrentImageIndex((prev) => {
+            let next = prev + newDirection;
+            const max = Math.min(info.images.length, 6);
+            if (next >= max) return 0;
+            if (next < 0) return max - 1;
+            return next;
+        });
+    };
+
+    const setPage = (index: number) => {
+        setDirection(index > currentImageIndex ? 1 : -1);
+        setCurrentImageIndex(index);
+    };
+
+    const swipeConfidenceThreshold = 10000;
+    const swipePower = (offset: number, velocity: number) => {
+        return Math.abs(offset) * velocity;
+    };
+
+
     return (
         <div className="min-h-screen bg-[#050a1f] text-white overflow-hidden relative">
             {/* Background for Residence A */}
-            {id === 'A' && (
+            {legacyId === 'A' && (
                 <div className="absolute inset-0 z-0 h-full w-full overflow-hidden">
                     <div className="absolute inset-0 bg-[url('/images/san-telmo-bg.jpg')] bg-cover bg-center blur-[4px] scale-105" />
                     <div className="absolute inset-0 bg-[#050a1f]/30 backdrop-blur-[1px]" />
@@ -102,7 +177,7 @@ export default function ResidenceDetailPage() {
             )}
 
             {/* Background for Residence B */}
-            {id === 'B' && (
+            {legacyId === 'B' && (
                 <div className="absolute inset-0 z-0 h-full w-full">
                     <div className="absolute inset-0 bg-[url('/images/residence-b.jpg')] bg-cover bg-top" />
                     <div className="absolute inset-0 bg-[#050a1f]/70 backdrop-blur-[1px]" />
@@ -110,12 +185,21 @@ export default function ResidenceDetailPage() {
             )}
 
             {/* Background for Residence C */}
-            {id === 'C' && (
+            {legacyId === 'C' && (
                 <div className="absolute inset-0 z-0 h-full w-full">
                     <div className="absolute inset-0 bg-[url('/images/residence-c.jpg')] bg-cover bg-top" />
                     <div className="absolute inset-0 bg-[#050a1f]/70 backdrop-blur-[1px]" />
                 </div>
             )}
+
+            {/* Default Background for new residences */}
+            {!legacyId && (
+                <div className="absolute inset-0 z-0 h-full w-full">
+                    <div className="absolute inset-0 bg-[url('/images/hero-obelisco.jpg')] bg-cover bg-center blur-[4px]" />
+                    <div className="absolute inset-0 bg-[#050a1f]/80 backdrop-blur-[1px]" />
+                </div>
+            )}
+
 
             {/* Back Navigation */}
             <div className="fixed top-0 left-0 w-full z-50 py-5 px-8 flex items-center gap-4 bg-[#050a1f]/80 backdrop-blur-xl border-b border-[#c5a059]/10">
@@ -178,41 +262,91 @@ export default function ResidenceDetailPage() {
                     </p>
                 </motion.div>
 
-                {/* Row 2: Photos 2x2 + Comfort Text */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 items-center"
-                >
-                    {/* 2x2 Photo grid */}
-                    <div className="grid grid-cols-2 gap-3">
-                        {info.images.map((src, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: i * 0.1 }}
-                                className="relative overflow-hidden rounded-sm border border-[#c5a059]/10 group cursor-zoom-in"
-                                style={{ aspectRatio: '4/3' }}
-                                onClick={() => setLightboxSrc(src)}
+                {/* 2x2 Photo grid replaced by Carousel */}
+                <div className="relative group overflow-hidden rounded-sm border border-[#c5a059]/20" style={{ aspectRatio: '16/9' }}>
+                    <AnimatePresence initial={false} custom={direction}>
+                        <motion.img
+                            key={currentImageIndex}
+                            src={info.images[currentImageIndex]}
+                            custom={direction}
+                            variants={{
+                                enter: (direction: number) => ({
+                                    x: direction > 0 ? 1000 : -1000,
+                                    opacity: 0
+                                }),
+                                center: {
+                                    zIndex: 1,
+                                    x: 0,
+                                    opacity: 1
+                                },
+                                exit: (direction: number) => ({
+                                    zIndex: 0,
+                                    x: direction < 0 ? 1000 : -1000,
+                                    opacity: 0
+                                })
+                            }}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{
+                                x: { type: "spring", stiffness: 300, damping: 30 },
+                                opacity: { duration: 0.2 }
+                            }}
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={1}
+                            onDragEnd={(e, { offset, velocity }) => {
+                                const swipe = swipePower(offset.x, velocity.x);
+
+                                if (swipe < -swipeConfidenceThreshold) {
+                                    paginate(1);
+                                } else if (swipe > swipeConfidenceThreshold) {
+                                    paginate(-1);
+                                }
+                            }}
+                            className="absolute w-full h-full object-cover cursor-zoom-in"
+                            onClick={() => setLightboxSrc(info.images[currentImageIndex])}
+                        />
+                    </AnimatePresence>
+
+                    {/* Arrows */}
+                    {info.images.length > 1 && (
+                        <>
+                            <button
+                                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-black/30 backdrop-blur-sm text-white rounded-full hover:bg-[#c5a059] hover:text-[#050a1f] transition-all opacity-0 group-hover:opacity-100"
+                                onClick={(e) => { e.stopPropagation(); paginate(-1); }}
                             >
-                                <img
-                                    src={src}
-                                    alt={`${tInfo.title} - Foto ${i + 1}`}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-[#050a1f]/20 group-hover:bg-transparent transition-colors duration-300" />
-                            </motion.div>
+                                <ChevronLeft size={24} />
+                            </button>
+                            <button
+                                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center bg-black/30 backdrop-blur-sm text-white rounded-full hover:bg-[#c5a059] hover:text-[#050a1f] transition-all opacity-0 group-hover:opacity-100"
+                                onClick={(e) => { e.stopPropagation(); paginate(1); }}
+                            >
+                                <ChevronRight size={24} />
+                            </button>
+                        </>
+                    )}
+
+                    {/* Indicators */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+                        {info.images.slice(0, 6).map((_: string, i: number) => (
+                            <button
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); setPage(i); }}
+                                className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentImageIndex
+                                    ? 'bg-[#c5a059] w-4'
+                                    : 'bg-white/40 hover:bg-white/60'
+                                    }`}
+                                aria-label={`Go to image ${i + 1}`}
+                            />
                         ))}
                     </div>
+                </div>
 
-                    {/* Comfort text */}
-                    <p className="text-white/60 text-base leading-relaxed">
-                        {tInfo.comfort}
-                    </p>
-                </motion.div>
+                {/* Comfort text */}
+                <p className="text-white/60 text-base leading-relaxed">
+                    {tInfo.comfort}
+                </p>
 
                 {/* HABITACIONES Button */}
                 <motion.div

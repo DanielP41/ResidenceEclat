@@ -1,14 +1,16 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/database';
+import logger from '../config/logger';
 
 export const getOccupancyStats = async (req: Request, res: Response) => {
     try {
-        const { residence } = req.query;
+        const { residenceId } = req.query;
 
         const roomFilter: any = { isDeleted: false, isActive: true };
-        if (residence) {
-            roomFilter.residence = String(residence);
+        if (residenceId) {
+            roomFilter.residenceId = parseInt(residenceId as string, 10);
         }
+
 
         const totalRoomsCount = await prisma.room.count({
             where: roomFilter
@@ -96,8 +98,8 @@ export const getOccupancyStats = async (req: Request, res: Response) => {
                 }
             }
         });
-    } catch (error) {
-        console.error('Error fetching occupancy stats:', error);
+    } catch (error: any) {
+        logger.error('Error al obtener estadísticas de ocupación', { error: error.message });
         res.status(500).json({ status: 'error', message: 'Error al obtener estadísticas de ocupación' });
     }
 };

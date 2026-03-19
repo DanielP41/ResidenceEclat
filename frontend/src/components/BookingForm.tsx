@@ -18,9 +18,32 @@ export default function BookingForm({ roomId, roomName, price }: { roomId: numbe
 
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [message, setMessage] = useState('');
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+    const validate = (): boolean => {
+        const errors: Record<string, string> = {};
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (!formData.checkIn) {
+            errors.checkIn = 'La fecha de check-in es requerida';
+        } else if (new Date(formData.checkIn) < today) {
+            errors.checkIn = 'El check-in no puede ser en el pasado';
+        }
+
+        if (!formData.checkOut) {
+            errors.checkOut = 'La fecha de check-out es requerida';
+        } else if (formData.checkIn && new Date(formData.checkOut) <= new Date(formData.checkIn)) {
+            errors.checkOut = 'El check-out debe ser posterior al check-in';
+        }
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validate()) return;
         setStatus('loading');
 
         try {
@@ -64,7 +87,7 @@ export default function BookingForm({ roomId, roomName, price }: { roomId: numbe
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white/5 p-8 border border-white/10">
+        <form onSubmit={handleSubmit} noValidate className="space-y-6 bg-white/5 p-8 border border-white/10">
             <h2 className="text-2xl font-serif text-white mb-6">Solicitar Reserva: {roomName}</h2>
 
             {status === 'error' && (
@@ -99,20 +122,22 @@ export default function BookingForm({ roomId, roomName, price }: { roomId: numbe
                     <input
                         required
                         type="date"
-                        className="w-full bg-black/40 border border-white/10 p-3 text-white focus:border-primary outline-none transition-colors"
+                        className={`w-full bg-black/40 border p-3 text-white focus:border-primary outline-none transition-colors ${fieldErrors.checkIn ? 'border-red-500/60' : 'border-white/10'}`}
                         value={formData.checkIn}
-                        onChange={e => setFormData({ ...formData, checkIn: e.target.value })}
+                        onChange={e => { setFormData({ ...formData, checkIn: e.target.value }); setFieldErrors(prev => ({ ...prev, checkIn: '' })); }}
                     />
+                    {fieldErrors.checkIn && <p className="text-red-400 text-xs mt-1">{fieldErrors.checkIn}</p>}
                 </div>
                 <div className="space-y-2">
                     <label className="text-xs uppercase tracking-widest text-white/40">Check-out</label>
                     <input
                         required
                         type="date"
-                        className="w-full bg-black/40 border border-white/10 p-3 text-white focus:border-primary outline-none transition-colors"
+                        className={`w-full bg-black/40 border p-3 text-white focus:border-primary outline-none transition-colors ${fieldErrors.checkOut ? 'border-red-500/60' : 'border-white/10'}`}
                         value={formData.checkOut}
-                        onChange={e => setFormData({ ...formData, checkOut: e.target.value })}
+                        onChange={e => { setFormData({ ...formData, checkOut: e.target.value }); setFieldErrors(prev => ({ ...prev, checkOut: '' })); }}
                     />
+                    {fieldErrors.checkOut && <p className="text-red-400 text-xs mt-1">{fieldErrors.checkOut}</p>}
                 </div>
             </div>
 

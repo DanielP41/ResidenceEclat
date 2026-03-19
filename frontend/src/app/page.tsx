@@ -8,6 +8,7 @@ import { ArrowRight, Star, ShieldCheck, Clock, MapPin, Facebook, Instagram, Chev
 import { useLanguage } from '@/context/LanguageContext';
 import { Language } from '@/lib/translations';
 import { WhatsAppIcon } from '@/components/Icons';
+import { residencesApi } from '@/lib/api';
 
 const NeighborhoodMap = dynamic(() => import('@/components/NeighborhoodMap'), { ssr: false });
 
@@ -16,8 +17,22 @@ export default function LandingPage() {
     const [showLangSelector, setShowLangSelector] = useState(false);
     const [showResidences, setShowResidences] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [residences, setResidences] = useState<any[]>([]);
 
     React.useEffect(() => {
+        const fetchResidences = async () => {
+            try {
+                const res = await residencesApi.getAll();
+                setResidences(res.data);
+            } catch (error) {
+                console.error('Error fetching residences:', error);
+            }
+        };
+        fetchResidences();
+    }, []);
+
+    React.useEffect(() => {
+
         const handleScroll = () => {
             setScrolled(window.scrollY > 50);
         };
@@ -111,20 +126,18 @@ export default function LandingPage() {
                                         className="absolute top-full left-0 w-full mt-1 bg-[#050a1f]/95 backdrop-blur-xl border border-[#c5a059]/30 rounded-lg shadow-2xl z-50 p-2"
                                     >
                                         <div className="flex flex-col gap-1">
-                                            {[
-                                                { id: 'A', label: 'Sede San Telmo' },
-                                                { id: 'B', label: 'Sede Parque Avellaneda I' },
-                                                { id: 'C', label: 'Sede Parque Avellaneda II' },
-                                            ].map((res) => (
+                                            {residences.map((res) => (
                                                 <Link
                                                     key={res.id}
                                                     href={`/residence/${res.id}`}
                                                     className="block w-full py-1.5 px-3 bg-transparent border border-[#c5a059]/50 rounded-sm text-center text-[#c5a059] font-serif text-xs tracking-[0.15em] uppercase hover:bg-[#c5a059] hover:text-[#050a1f] transition-all duration-300"
                                                 >
-                                                    <span className="relative z-10">{res.label}</span>
+                                                    <span className="relative z-10">{res.name.toLowerCase().startsWith('sede') ? res.name : `Sede ${res.name}`}</span>
+
                                                 </Link>
                                             ))}
                                         </div>
+
                                     </motion.div>
                                 )}
                             </AnimatePresence>

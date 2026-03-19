@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { roomsApi } from '@/lib/api';
 import BookingForm from '@/components/BookingForm';
+import BookingCalendar from '@/components/BookingCalendar';
 import { Wifi, Users, Wind, MapPin, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 import { useLanguage } from '@/context/LanguageContext';
+import { SkeletonRoomDetail } from '@/components/ui/Skeleton';
 
 const RESIDENCE_NAMES: Record<string, string> = {
     'A': 'Sede San Telmo',
@@ -32,7 +34,7 @@ export default function RoomDetailPage({ params }: { params: { id: string } }) {
             });
     }, [params.id]);
 
-    if (loading) return <div className="h-screen flex items-center justify-center bg-black text-white/40">{t.common.loading || 'Cargando...'}</div>;
+    if (loading) return <div className="bg-black min-h-screen"><SkeletonRoomDetail /></div>;
     if (!room) return <div className="h-screen flex items-center justify-center bg-black text-white/40">{t.common.not_found || 'Habitación no encontrada.'}</div>;
 
     return (

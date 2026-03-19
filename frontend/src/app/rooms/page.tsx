@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { roomsApi } from '@/lib/api';
 import RoomCard from '@/components/RoomCard';
 import { Search, Building, Filter } from 'lucide-react';
@@ -8,14 +8,12 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 import { useLanguage } from '@/context/LanguageContext';
+import { SkeletonRoomsGrid } from '@/components/ui/Skeleton';
 
-const RESIDENCE_NAMES: Record<string, string> = {
-    'A': 'Sede San Telmo',
-    'B': 'Sede Parque Avellaneda I',
-    'C': 'Sede Parque Avellaneda II'
-};
+// Maps numeric residence DB IDs to the letter keys used in translations
+const ID_TO_LETTER: Record<string, string> = { '1': 'A', '2': 'C', '3': 'B' };
 
-export default function RoomsPage() {
+function RoomsContent() {
     const { t } = useLanguage();
     const [rooms, setRooms] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -29,10 +27,12 @@ export default function RoomsPage() {
         setSelectedResidence(residence);
     }, [searchParams]);
 
+    const residenceLetter = ID_TO_LETTER[selectedResidence] || '';
+
     useEffect(() => {
         setLoading(true);
-        // If selectedResidence is empty, pass undefined to fetch all
-        roomsApi.getAll(selectedResidence || undefined)
+        const idNum = selectedResidence ? parseInt(selectedResidence, 10) : undefined;
+        roomsApi.getAll(!idNum || isNaN(idNum) ? undefined : idNum)
             .then(res => {
                 setRooms(res.data);
                 setLoading(false);
@@ -50,9 +50,9 @@ export default function RoomsPage() {
             <header className="py-20 px-10 border-b border-white/5 text-center">
                 <Link href="/" className="text-primary tracking-[0.5em] text-xs mb-4 uppercase block">{t.common.back_home}</Link>
                 <h1 className="text-4xl md:text-6xl font-serif">{t.nav.rooms}</h1>
-                {selectedResidence && (t as any).residences[selectedResidence] && (
+                {residenceLetter && (t as any).residences[residenceLetter] && (
                     <p className="text-white/40 mt-4 text-sm tracking-widest uppercase">
-                        {t.common.rooms_in} {(t as any).residences[selectedResidence].title}
+                        {t.common.rooms_in} {(t as any).residences[residenceLetter].title}
                     </p>
                 )}
             </header>
@@ -62,10 +62,7 @@ export default function RoomsPage() {
             {/* Main Content */}
             <main className="py-20 px-10 max-w-7xl mx-auto">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                        <div className="w-10 h-10 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
-                        <p className="text-white/40 text-sm tracking-widest uppercase">Cargando habitaciones...</p>
-                    </div>
+                    <SkeletonRoomsGrid count={6} />
                 ) : error ? (
                     <div className="text-center py-20">
                         <p className="text-red-400 mb-4">{error}</p>
@@ -91,5 +88,13 @@ export default function RoomsPage() {
                 )}
             </main>
         </div>
+    );
+}
+
+export default function RoomsPage() {
+    return (
+        <Suspense fallback={<div className="bg-[#050a1f] min-h-screen" />}>
+            <RoomsContent />
+        </Suspense>
     );
 }

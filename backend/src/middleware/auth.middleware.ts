@@ -11,16 +11,20 @@ declare global {
 }
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers.authorization;
+    // Prefer httpOnly cookie, fall back to Authorization header (for API clients / Swagger)
+    const cookieToken = req.cookies?.accessToken;
+    const headerToken = req.headers.authorization?.startsWith('Bearer ')
+        ? req.headers.authorization.split(' ')[1]
+        : null;
 
-    if (!authHeader?.startsWith('Bearer ')) {
+    const token = cookieToken || headerToken;
+
+    if (!token) {
         return res.status(401).json({
             status: 'error',
             message: 'No autorizado: Falta el token de autenticación',
         });
     }
-
-    const token = authHeader.split(' ')[1];
 
     try {
         const decoded = verifyAccessToken(token);

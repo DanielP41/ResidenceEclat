@@ -1,38 +1,63 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Save } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Plus, Trash2, Save, Upload, Loader2 } from 'lucide-react';
+import { uploadsApi } from '@/lib/api';
+import { fetchApi } from '@/lib/api';
 
 interface RoomFormProps {
     room?: any; // If provided, we are editing
+    residenceId: number;
     onClose: () => void;
     onSave: (data: any) => void;
 }
 
-export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => {
+
+export const RoomForm: React.FC<RoomFormProps> = ({ room, residenceId, onClose, onSave }) => {
+
     const [formData, setFormData] = useState({
         name: '',
         description: '',
         price: 0,
         capacity: 1,
-        residence: 'A',
+        residenceId: residenceId,
         status: 'AVAILABLE',
         amenities: [] as string[],
         images: [] as string[],
     });
 
+
+
+
+    const [residences, setResidences] = useState<any[]>([]);
+
+
     const [newAmenity, setNewAmenity] = useState('');
-    const [newImage, setNewImage] = useState('');
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        const fetchResidences = async () => {
+            try {
+                const response = await fetchApi('/residences');
+                setResidences(response.data);
+            } catch (error) {
+                console.error('Error fetching residences:', error);
+            }
+        };
+
+
+        fetchResidences();
+
         if (room) {
             setFormData({
                 name: room.name || '',
                 description: room.description || '',
                 price: parseFloat(room.price) || 0,
                 capacity: room.capacity || 1,
-                residence: room.residence || 'A',
+                residenceId: room.residenceId || 0,
                 status: room.status || 'AVAILABLE',
                 amenities: Array.isArray(room.amenities) ? room.amenities : [],
                 images: Array.isArray(room.images) ? room.images : [],
@@ -40,12 +65,14 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
         }
     }, [room]);
 
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'price' || name === 'capacity' ? parseFloat(value) : value
+            [name]: ['price', 'capacity', 'residenceId'].includes(name) ? parseFloat(value) : value
         }));
+
     };
 
     const addAmenity = () => {
@@ -65,13 +92,27 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
         }));
     };
 
-    const addImage = () => {
-        if (newImage.trim()) {
-            setFormData(prev => ({
-                ...prev,
-                images: [...prev.images, newImage.trim()]
-            }));
-            setNewImage('');
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+        if (file.size > MAX_SIZE) {
+            setUploadError('El archivo supera el límite de 5 MB');
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        setUploading(true);
+        setUploadError('');
+        try {
+            const result = await uploadsApi.uploadImage(file);
+            setFormData(prev => ({ ...prev, images: [...prev.images, result.url] }));
+        } catch (error: any) {
+            setUploadError(error.message || 'Error al subir imagen');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -117,7 +158,7 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
                                 value={formData.name}
                                 onChange={handleChange}
                                 className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-primary/50"
-                                placeholder="Ej: Habitación 101"
+                                placeholder="Ej: Habitación 01"
                             />
                         </div>
                         <div>
@@ -137,10 +178,12 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
                                     required
                                     type="number"
                                     name="price"
+                                    min="1"
                                     value={formData.price}
                                     onChange={handleChange}
                                     className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-primary/50"
                                 />
+
                             </div>
                             <div>
                                 <label className="block text-[10px] uppercase tracking-widest text-primary font-bold mb-2">Capacidad</label>
@@ -154,40 +197,26 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
                                 />
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-primary font-bold mb-2">Sede</label>
-                                <select
-                                    name="residence"
-                                    value={formData.residence}
-                                    onChange={handleChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-primary/50"
-                                >
-                                    <option value="A">San Telmo</option>
-                                    <option value="B">Parque Avellaneda I</option>
-                                    <option value="C">Parque Avellaneda II</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-[10px] uppercase tracking-widest text-primary font-bold mb-2">Estado Inicial</label>
-                                <select
-                                    name="status"
-                                    value={formData.status}
-                                    onChange={handleChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-primary/50"
-                                >
-                                    <option value="AVAILABLE">Disponible</option>
-                                    <option value="PARTIAL_1">1 Cama Disp.</option>
-                                    <option value="PARTIAL_2">2 Camas Disp.</option>
-                                    <option value="PARTIAL_3">3 Camas Disp.</option>
-                                    <option value="OCCUPIED">Ocupada</option>
-                                    <option value="RESERVED">Reservada</option>
-                                    <option value="MAINTENANCE">Mantenimiento</option>
-                                </select>
-                            </div>
 
+                        <div>
+                            <label className="block text-[10px] uppercase tracking-widest text-primary font-bold mb-2">Estado Inicial</label>
+                            <select
+                                name="status"
+                                value={formData.status}
+                                onChange={handleChange}
+                                className="w-full bg-white/5 border border-white/10 rounded-md p-3 text-white focus:outline-none focus:border-primary/50"
+                            >
+                                <option value="AVAILABLE">Disponible</option>
+                                <option value="PARTIAL_1">1 Cama Disp.</option>
+                                <option value="PARTIAL_2">2 Camas Disp.</option>
+                                <option value="PARTIAL_3">3 Camas Disp.</option>
+                                <option value="OCCUPIED">Ocupada</option>
+                                <option value="RESERVED">Reservada</option>
+                                <option value="MAINTENANCE">Mantenimiento</option>
+                            </select>
                         </div>
                     </div>
+
 
                     {/* Amenities and Images */}
                     <div className="space-y-6">
@@ -218,19 +247,29 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
                         </div>
 
                         <div>
-                            <label className="block text-[10px] uppercase tracking-widest text-primary font-bold mb-2">Imágenes (URLs)</label>
-                            <div className="flex gap-2 mb-3">
-                                <input
-                                    value={newImage}
-                                    onChange={(e) => setNewImage(e.target.value)}
-                                    className="flex-1 bg-white/5 border border-white/10 rounded-md p-2 text-sm text-white focus:outline-none focus:border-primary/50"
-                                    placeholder="https://..."
-                                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-                                />
-                                <button type="button" onClick={addImage} className="bg-white/10 p-2 rounded-md hover:bg-white/20 text-white transition-colors">
-                                    <Plus size={20} />
-                                </button>
-                            </div>
+                            <label className="block text-[10px] uppercase tracking-widest text-primary font-bold mb-2">Imágenes</label>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                className="hidden"
+                                onChange={handleFileSelect}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="w-full flex items-center justify-center gap-2 bg-white/5 border border-dashed border-white/20 rounded-md p-4 text-white/60 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-3"
+                            >
+                                {uploading ? (
+                                    <><Loader2 size={18} className="animate-spin" /> Subiendo...</>
+                                ) : (
+                                    <><Upload size={18} /> Subir imagen (JPG, PNG, WebP · máx 5MB)</>
+                                )}
+                            </button>
+                            {uploadError && (
+                                <p className="text-red-400 text-xs mb-3">{uploadError}</p>
+                            )}
                             <div className="grid grid-cols-3 gap-2">
                                 {formData.images.map((url, idx) => (
                                     <div key={idx} className="relative aspect-video rounded overflow-hidden border border-white/10 group">
@@ -265,8 +304,8 @@ export const RoomForm: React.FC<RoomFormProps> = ({ room, onClose, onSave }) => 
                             {loading ? 'Guardando...' : 'Guardar Habitación'}
                         </button>
                     </div>
-                </form>
-            </div>
-        </div>
+                </form >
+            </div >
+        </div >
     );
 };

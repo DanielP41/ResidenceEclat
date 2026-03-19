@@ -14,6 +14,8 @@ import {
     Phone,
     FileText
 } from 'lucide-react';
+import { SkeletonBookingsList } from '@/components/ui/Skeleton';
+import { toast } from 'sonner';
 
 interface Booking {
     id: number;
@@ -24,8 +26,11 @@ interface Booking {
     };
     room: {
         name: string;
-        residence: string;
+        residence: {
+            name: string;
+        };
     };
+
     checkIn: string;
     checkOut: string;
     status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'CHECKED_IN' | 'CHECKED_OUT';
@@ -46,7 +51,7 @@ export default function AdminBookingsPage() {
         setLoading(true);
         try {
             const res = await bookingsApi.getAll();
-            setBookings(res.data);
+            setBookings(res.data?.items ?? res.data ?? []);
         } catch (err) {
             console.error(err);
         } finally {
@@ -61,7 +66,7 @@ export default function AdminBookingsPage() {
             await fetchBookings();
         } catch (err) {
             console.error(err);
-            alert('Error al actualizar el estado');
+            toast.error('Error al actualizar el estado');
         } finally {
             setUpdatingId(null);
         }
@@ -97,10 +102,7 @@ export default function AdminBookingsPage() {
             </header>
 
             {loading ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                    <div className="w-10 h-10 border-2 border-primary border-t-transparent animate-spin rounded-full"></div>
-                    <p className="text-white/20 uppercase tracking-[0.2em] text-[10px]">Sincronizando reservas...</p>
-                </div>
+                <SkeletonBookingsList count={5} />
             ) : (
                 <div className="space-y-6">
                     {bookings.length === 0 ? (
@@ -141,8 +143,9 @@ export default function AdminBookingsPage() {
                                             <Home size={14} className="text-primary/60" />
                                             <span>{booking.room.name}</span>
                                             <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/40 uppercase">
-                                                {booking.room.residence === 'A' ? 'San Telmo' : 'P. Patricios'}
+                                                {booking.room.residence.name}
                                             </span>
+
                                         </div>
                                         <div className="flex items-center gap-2 text-sm text-white/60">
                                             <Calendar size={14} className="text-primary/60" />
@@ -171,6 +174,7 @@ export default function AdminBookingsPage() {
                                                     disabled={updatingId === booking.id}
                                                     className="p-2 text-green-400 hover:bg-green-500/10 rounded-full transition-colors"
                                                     title="Confirmar"
+                                                    aria-label={`Confirmar reserva #${booking.id}`}
                                                 >
                                                     <CheckCircle2 size={20} />
                                                 </button>
@@ -181,6 +185,7 @@ export default function AdminBookingsPage() {
                                                     disabled={updatingId === booking.id}
                                                     className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-full transition-colors"
                                                     title="Check-in"
+                                                    aria-label={`Registrar check-in reserva #${booking.id}`}
                                                 >
                                                     <Clock size={20} />
                                                 </button>
@@ -191,6 +196,7 @@ export default function AdminBookingsPage() {
                                                     disabled={updatingId === booking.id}
                                                     className="p-2 text-red-400 hover:bg-red-500/10 rounded-full transition-colors"
                                                     title="Cancelar"
+                                                    aria-label={`Cancelar reserva #${booking.id}`}
                                                 >
                                                     <XCircle size={20} />
                                                 </button>

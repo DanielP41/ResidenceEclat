@@ -1,23 +1,42 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Home, BarChart3, LogOut, ChevronDown, ChevronUp } from 'lucide-react';
+import { Home, BarChart3, LogOut, ChevronDown, ChevronUp, Plus } from 'lucide-react';
+import { ResidenceForm } from './ResidenceForm';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Sidebar = () => {
     const [roomsOpen, setRoomsOpen] = useState(false);
+    const [showResidenceForm, setShowResidenceForm] = useState(false);
+    const [residences, setResidences] = useState<any[]>([]);
+
     const pathname = usePathname();
 
-    const residences = [
-        { id: 'A', label: 'San Telmo' },
-        { id: 'B', label: 'Parque Avellaneda I' },
-        { id: 'C', label: 'Parque Avellaneda II' },
-    ];
+    React.useEffect(() => {
+        const fetchResidences = async () => {
+            try {
+                const { fetchApi } = await import('@/lib/api');
+                const res = await fetchApi('/residences');
+                setResidences(res.data);
+            } catch (error) {
+                console.error('Error fetching residences:', error);
+            }
+        };
+        fetchResidences();
+    }, []);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        try {
+            const { fetchApi } = await import('@/lib/api');
+            await fetchApi('/auth/logout', { method: 'POST' });
+        } catch {
+            // continuar con el logout local aunque falle la petición
+        }
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         window.location.href = '/admin/login';
     };
@@ -73,8 +92,9 @@ export const Sidebar = () => {
                                                 : 'text-white/40 hover:text-white'
                                                 }`}
                                         >
-                                            {res.label}
+                                            {res.name.toLowerCase().startsWith('sede') ? res.name : `Sede ${res.name}`}
                                         </Link>
+
                                     ))}
                                 </div>
                             </motion.div>
@@ -82,7 +102,14 @@ export const Sidebar = () => {
                     </AnimatePresence>
                 </div>
 
+                <button
+                    onClick={() => setShowResidenceForm(true)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-[#B8860B] hover:text-primary transition-colors text-xs uppercase tracking-widest font-bold mt-4 border border-primary/20 bg-primary/5 rounded-md hover:bg-primary/10"
+                >
+                    <Plus size={16} /> Nueva Sede
+                </button>
             </nav>
+
 
             <button
                 onClick={handleLogout}
@@ -90,6 +117,16 @@ export const Sidebar = () => {
             >
                 <LogOut size={18} /> Cerrar Sesión
             </button>
+
+            {showResidenceForm && (
+                <ResidenceForm
+                    onClose={() => setShowResidenceForm(false)}
+                    onSave={() => {
+                        window.location.reload();
+                    }}
+                />
+            )}
         </aside>
+
     );
 };

@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient, Role, RoomStatus, Residence } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -35,119 +35,71 @@ async function main() {
     });
     console.log(`✅ Staff user created: ${staff.email}`);
 
-    // ── Create sample rooms ──
-    // ── Create sample rooms ──
-    const residences = [
+    // ── Create Dynamic Residences ──
+    const residenceData = [
+        { name: 'San Telmo', address: 'Calle Falsa 123, CABA', description: 'Nuestra sede histórica en San Telmo.' },
+        { name: 'Parque Avellaneda I', address: 'Av. Directorio 456, CABA', description: 'Moderna sede en el corazón de Parque Avellaneda.' },
+        { name: 'Parque Avellaneda II', address: 'Av. Directorio 789, CABA', description: 'Anexo con servicios premium.' }
+    ];
+
+    const createdResidences: Residence[] = [];
+    for (const res of residenceData) {
+        const created = await prisma.residence.create({
+            data: res
+        });
+        createdResidences.push(created);
+        console.log(`✅ Residence created: ${created.name}`);
+    }
+
+    // ── Create rooms linked to residences ──
+    const roomsSeed = [
+        // Sede A (ID 1)
+        ...Array.from({ length: 5 }, (_, i) => ({
+            name: `Habitación Individual ${101 + i}`,
+            description: 'Acogedora habitación individual con baño privado.',
+            price: 35000,
+            capacity: 1,
+            residenceId: createdResidences[0].id,
+            images: ["https://images.unsplash.com/photo-1566665797739-1674de7a421a"]
+        })),
         {
-            name: 'Residencia A',
-            rooms: [
-                // Individuales (5)
-                ...[
-                    "https://images.unsplash.com/photo-1566665797739-1674de7a421a",
-                    "https://images.unsplash.com/photo-1611892440504-42a792e24d32",
-                    "https://images.unsplash.com/photo-1540518614846-7eded433c457",
-                    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
-                    "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2069"
-                ].map((img, i) => ({
-                    name: 'Habitacion Indvidual',
-                    description: 'Acogedora habitación individual con baño privado, ideal para estadías cortas o largas.',
-                    price: 35000,
-                    capacity: 1,
-                    amenities: ['WiFi', 'Baño privado', 'Aire acondicionado', 'Escritorio'],
-                    images: [img]
-                })),
-                // Doble (1)
-                {
-                    name: 'Habitacion Doble',
-                    description: 'Espaciosa habitación doble con cama matrimonial y todas las comodidades.',
-                    price: 50000,
-                    capacity: 2,
-                    amenities: ['WiFi', 'Baño privado', 'Aire acondicionado', 'TV LED 43"'],
-                    images: ["https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1974"]
-                },
-                // Cuadruples (4)
-                ...Array.from({ length: 4 }, (_, i) => ({
-                    name: 'Habitacion Cuadruple',
-                    description: 'Habitación familiar o grupal con capacidad para 4 personas.',
-                    price: 80000,
-                    capacity: 4,
-                    amenities: ['WiFi', 'Baño privado', 'Aire acondicionado', '4 Camas'],
-                    images: ["https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069"]
-                }))
-            ]
+            name: 'Suite Doble Deluxe',
+            description: 'Espaciosa habitación doble con cama matrimonial.',
+            price: 50000,
+            capacity: 2,
+            residenceId: createdResidences[0].id,
+            images: ["https://images.unsplash.com/photo-1590490360182-c33d57733427"]
         },
+        // Sede B (ID 2)
         {
-            name: 'Residencia B',
-            rooms: [
-                {
-                    name: 'Studio Moderno',
-                    description: 'Studio concepto abierto con kitchenette y zona de estar. Diseño industrial y moderno.',
-                    price: 45000,
-                    capacity: 1,
-                    amenities: ['WiFi', 'Kitchenette', 'Aire acondicionado', 'Smart TV', 'Escritorio'],
-                    images: [
-                        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?q=80&w=1980",
-                        "https://images.unsplash.com/photo-1505693314120-0d443867891c?q=80&w=1918"
-                    ]
-                },
-                {
-                    name: 'Suite Ejecutiva',
-                    description: 'Suite pensada para profesionales. Amplio espacio de trabajo, insonorización y servicios premium.',
-                    price: 70000,
-                    capacity: 2,
-                    amenities: ['WiFi Alta Velocidad', 'Insonorización', 'Cafetera Nespresso', 'Escritorio Ergonómico'],
-                    images: [
-                        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070",
-                        "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070"
-                    ]
-                }
-            ]
+            name: 'Estudio Moderno',
+            description: 'Studio concepto abierto con kitchenette.',
+            price: 45000,
+            capacity: 1,
+            residenceId: createdResidences[1].id,
+            images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688"]
         },
+        // Sede C (ID 3)
         {
-            name: 'Residencia C',
-            rooms: [
-                {
-                    name: 'Habitación Compartida Premium',
-                    description: 'Habitación compartida de alto nivel. Camas tipo cápsula para mayor privacidad, lockers inteligentes y áreas comunes de diseño.',
-                    price: 20000,
-                    capacity: 1,
-                    amenities: ['WiFi', 'Locker Inteligente', 'Cama Cápsula', 'Áreas Comunes', 'Cocina Compartida'],
-                    images: [
-                        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?q=80&w=2069",
-                        "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070"
-                    ]
-                },
-                {
-                    name: 'Loft con Terraza',
-                    description: 'Loft exclusivo en el último piso con terraza privada y vistas panorámicas de la ciudad.',
-                    price: 90000,
-                    capacity: 2,
-                    amenities: ['WiFi', 'Terraza Privada', 'Jacuzzi', 'Cocina Completa', 'Vista Panorámica'],
-                    images: [
-                        "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?q=80&w=2070",
-                        "https://images.unsplash.com/photo-1512918760513-95f192972701?q=80&w=2070"
-                    ]
-                }
-            ]
+            name: 'Loft con Terraza',
+            description: 'Loft exclusivo con terraza privada.',
+            price: 90000,
+            capacity: 2,
+            residenceId: createdResidences[2].id,
+            images: ["https://images.unsplash.com/photo-1560185127-6ed189bf02f4"]
         }
     ];
 
-    for (const residence of residences) {
-        for (const roomData of residence.rooms) {
-            const room = await prisma.room.create({
-                data: {
-                    name: roomData.name,
-                    description: roomData.description,
-                    price: roomData.price,
-                    capacity: roomData.capacity,
-                    residence: residence.name.replace('Residencia ', ''), // Store as 'A', 'B', 'C'
-                    amenities: roomData.amenities,
-                    images: roomData.images,
-                },
-            });
-            console.log(`✅ Room created in ${residence.name}: ${room.name}`);
-        }
+    for (const roomData of roomsSeed) {
+        await prisma.room.create({
+            data: {
+                ...roomData,
+                status: RoomStatus.AVAILABLE,
+                amenities: ['WiFi', 'Aire acondicionado', 'Baño privado'],
+            }
+        });
     }
+    console.log(`✅ Created ${roomsSeed.length} rooms`);
 
     // ── Create sample guest ──
     const guest = await prisma.guest.upsert({

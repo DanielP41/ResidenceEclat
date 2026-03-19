@@ -1,5 +1,6 @@
 import { prisma } from '../config/database';
-import { CreateRoomSchema } from '../utils/validators';
+import { CreateRoomSchema, UpdateRoomSchema } from '../utils/validators';
+import { NotFoundError } from '../utils/errors';
 import { z } from 'zod';
 import { createAuditLog } from './audit.service';
 
@@ -16,14 +17,18 @@ export const getRoomById = async (id: number) => {
     });
 };
 
-export const createRoom = async (data: z.infer<typeof CreateRoomSchema>, userId: number) => {
+export const createRoom = async (data: any, userId: number, ipAddress?: string) => {
+    // Validar datos
+    const validatedData = CreateRoomSchema.parse(data);
+
     const room = await prisma.room.create({
         data: {
-            ...data,
-            amenities: data.amenities || [],
-            images: data.images || [],
+            ...validatedData,
+            amenities: validatedData.amenities || [],
+            images: validatedData.images || [],
         },
     });
+
 
     await createAuditLog({
         userId,
@@ -31,6 +36,7 @@ export const createRoom = async (data: z.infer<typeof CreateRoomSchema>, userId:
         entityType: 'ROOM',
         entityId: room.id,
         newValues: room,
+        ipAddress,
     });
 
     return room;
@@ -39,15 +45,19 @@ export const createRoom = async (data: z.infer<typeof CreateRoomSchema>, userId:
 export const updateRoom = async (
     id: number,
     data: Partial<z.infer<typeof CreateRoomSchema>>,
-    userId: number
+    userId: number,
+    ipAddress?: string,
 ) => {
-    const oldRoom = await prisma.room.findUnique({ where: { id } });
-    if (!oldRoom) throw new Error('Habitación no encontrada');
+    const oldRoom = await prisma.room.findFirst({ where: { id, isDeleted: false } });
+    if (!oldRoom) throw new NotFoundError('Habitación no encontrada', 'ROOM_NOT_FOUND');
+
+    const validatedData = UpdateRoomSchema.parse(data);
 
     const updatedRoom = await prisma.room.update({
         where: { id },
-        data,
+        data: validatedData,
     });
+
 
     await createAuditLog({
         userId,
@@ -56,12 +66,16 @@ export const updateRoom = async (
         entityId: id,
         oldValues: oldRoom,
         newValues: updatedRoom,
+        ipAddress,
     });
 
     return updatedRoom;
 };
 
-export const deleteRoom = async (id: number, userId: number) => {
+export const deleteRoom = async (id: number, userId: number, ipAddress?: string) => {
+    const existing = await prisma.room.findFirst({ where: { id, isDeleted: false } });
+    if (!existing) throw new NotFoundError('Habitación no encontrada', 'ROOM_NOT_FOUND');
+
     const room = await prisma.room.update({
         where: { id },
         data: {
@@ -76,6 +90,7 @@ export const deleteRoom = async (id: number, userId: number) => {
         action: 'DELETE',
         entityType: 'ROOM',
         entityId: id,
+        ipAddress,
     });
 
     return room;
@@ -109,42 +124,78 @@ export const checkAvailability = async (roomId: number, checkIn: string, checkOu
     return !overlappingBookings;
 };
 
-export const getAllRooms = async (residence?: string) => {
+export const getAllRooms = async (filters: {
+    residenceId?: number;
+    priceMin?: number;
+    priceMax?: number;
+    capacity?: number;
+    status?: string;
+    sortBy?: 'price' | 'name' | 'capacity';
+    order?: 'asc' | 'desc';
+} = {}) => {
     const where: any = { isDeleted: false, isActive: true };
-    if (residence) {
-        where.residence = residence;
+
+    if (filters.residenceId) where.residenceId = filters.residenceId;
+    if (filters.capacity)    where.capacity    = { gte: filters.capacity };
+    if (filters.status)      where.status      = filters.status;
+    if (filters.priceMin !== undefined || filters.priceMax !== undefined) {
+        where.price = {};
+        if (filters.priceMin !== undefined) where.price.gte = filters.priceMin;
+        if (filters.priceMax !== undefined) where.price.lte = filters.priceMax;
     }
 
     return prisma.room.findMany({
         where,
-        orderBy: {
-            price: 'asc'
-        }
+        include: { residence: true },
+        orderBy: { [filters.sortBy ?? 'price']: filters.order ?? 'asc' },
     });
 };
+
 
 export const getAvailableRooms = async (checkIn: string, checkOut: string, capacity?: number) => {
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
 
-    // 1. Obtener todas las habitaciones activas y con capacidad mínima
-    const allRooms = await prisma.room.findMany({
+    // Query optimizada: obtiene habitaciones disponibles en UNA sola consulta
+    // Excluye habitaciones que tienen reservas solapadas con el rango de fechas
+    const availableRooms = await prisma.room.findMany({
         where: {
             isActive: true,
             isDeleted: false,
             ...(capacity ? { capacity: { gte: capacity } } : {}),
+            // Excluir habitaciones con reservas que se solapan
+            NOT: {
+                bookings: {
+                    some: {
+                        status: { not: 'CANCELLED' },
+                        OR: [
+                            // Reserva empieza antes y termina después del checkIn
+                            {
+                                checkIn: { lte: checkInDate },
+                                checkOut: { gt: checkInDate },
+                            },
+                            // Reserva empieza antes del checkOut y termina después
+                            {
+                                checkIn: { lt: checkOutDate },
+                                checkOut: { gte: checkOutDate },
+                            },
+                            // Reserva está completamente dentro del rango
+                            {
+                                checkIn: { gte: checkInDate },
+                                checkOut: { lte: checkOutDate },
+                            },
+                        ],
+                    },
+                },
+            },
+        },
+        include: {
+            residence: true,
+        },
+        orderBy: {
+            price: 'asc',
         },
     });
-
-    // 2. Filtrar las habitaciones que no tienen reservas solapadas en ese rango
-    const availableRooms: any[] = [];
-
-    for (const room of allRooms) {
-        const isAvailable = await checkAvailability(room.id, checkIn, checkOut);
-        if (isAvailable) {
-            availableRooms.push(room);
-        }
-    }
 
     return availableRooms;
 };
